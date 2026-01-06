@@ -1,0 +1,21 @@
+// src/middleware/authMiddleware.js
+const jwt = require('jsonwebtoken');
+
+const verifyToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; // Format: "Bearer <TOKEN>"
+
+  if (!token) {
+    return res.status(401).json({ error: "Access Denied. No token provided." });
+  }
+
+  try {
+    const verified = jwt.verify(token, process.env.JWT_SECRET || "super_secret_key");
+    req.user = verified; // We attach the user data (id, dept, role) to the request
+    next();
+  } catch (err) {
+    res.status(403).json({ error: "Invalid Token" });
+  }
+};
+
+module.exports = verifyToken;

@@ -1,20 +1,24 @@
-require('dotenv').config();
-const { Pool } = require('pg');
-const { PrismaPg } = require('@prisma/adapter-pg');
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
 
-// 1. Setup the connection pool
-const connectionString = `${process.env.DATABASE_URL}`;
-const pool = new Pool({ connectionString });
-
-// 2. Setup the Prisma Adapter
-const adapter = new PrismaPg(pool);
-const prisma = new PrismaClient({ adapter });
+const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Starting seed...');
+  console.log('Start seeding HODs...');
 
+  // --- STEP 1: CLEAR EXISTING DATA ---
+  // Option A: Delete ALL users (Fresh start)
+  await prisma.user.deleteMany({});
+  console.log('Deleted all previous users.');
+
+  /* // Option B: Delete ONLY HODs (If you want to keep Students)
+  await prisma.user.deleteMany({
+    where: { role: 'HOD' }
+  });
+  */
+
+  // --- STEP 2: PREPARE DATA ---
+  // Create a hashed password (all HODs use "admin123")
   const hashedPassword = await bcrypt.hash('admin123', 10);
 
   const hods = [
@@ -22,29 +26,27 @@ async function main() {
     { username: 'hod_ece', department: 'ECE' },
     { username: 'hod_mech', department: 'MECH' },
     { username: 'hod_civil', department: 'CIVIL' },
+    { username: 'hod_IT', department: 'IT' },
     { username: 'hod_eee', department: 'EEE' },
-    { username: 'hod_it', department: 'IT' },
-    { username: 'hod_aids', department: 'AIDS' },
-    { username: 'hod_aiml', department: 'AIML' },
-    { username: 'hod_MCA', department: 'MCA' },
-    { username: 'hod_mba', department: 'MBA' }
+    { username: 'hod_AIDS', department: 'AIDS' },
+    { username: 'hod_MBA', department: 'MBA' },
+    { username: 'hod_Mca', department: 'MCA' },
+    { username: 'hod_ICE', department: 'ICE' }
   ];
 
-  for (const hod of hods) {
-    const user = await prisma.user.upsert({
-      where: { username: hod.username },
-      update: {},
-      create: {
-        username: hod.username,
-        password: hashedPassword,
-        department: hod.department,
-        role: 'HOD',
-      },
-    });
-    console.log(`✅ Created HOD: ${user.username}`);
-  }
-  
-  console.log('🏁 Seeding finished.');
+  // --- STEP 3: INSERT NEW DATA ---
+  // We can use createMany for faster performance since we just deleted everything
+  await prisma.user.createMany({
+    data: hods.map(hod => ({
+      username: hod.username,
+      password: hashedPassword,
+      department: hod.department,
+      role: 'HOD',
+    })),
+    skipDuplicates: true, // Just in case
+  });
+
+  console.log(`Seeding finished. Added ${hods.length} HODs.`);
 }
 
 main()
