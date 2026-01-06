@@ -1,0 +1,40 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// 1. The HOD / Admin User Table
+model User {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique // e.g., "hod_cse"
+  password     String   // Hashed password
+  role         String   @default("HOD") // "HOD" or "STAFF"
+  department   String   // e.g., "CSE", "ECE", "MECH"
+}
+
+// 2. The Student Table
+model Student {
+  id             Int      @id @default(autoincrement())
+  registerNumber String   @unique
+  name           String
+  
+  // Grouping fields
+  department     String   // Must match User department (e.g., "CSE")
+  year           Int      // 1, 2, 3, or 4
+  
+  // Fee Details
+  totalFee       Float
+  paidFee        Float    @default(0)
+  
+  // Personal Details
+  parentName     String
+  parentPhone    String
+  address        String?
+  
+  createdAt      DateTime @default(now())
+}
