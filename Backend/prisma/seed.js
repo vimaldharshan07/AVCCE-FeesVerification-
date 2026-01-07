@@ -35,7 +35,6 @@ async function main() {
   ];
 
   // --- STEP 3: INSERT NEW DATA ---
-  // We can use createMany for faster performance since we just deleted everything
   await prisma.user.createMany({
     data: hods.map(hod => ({
       username: hod.username,
@@ -43,7 +42,7 @@ async function main() {
       department: hod.department,
       role: 'HOD',
     })),
-    skipDuplicates: true, // Just in case
+    skipDuplicates: true,
   });
 
   console.log(`Seeding finished. Added ${hods.length} HODs.`);

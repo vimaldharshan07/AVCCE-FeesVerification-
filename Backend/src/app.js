@@ -15,10 +15,8 @@ app.use(cors());
 app.use(express.json());
 
 
-app.use('/api/auth', authRoutes);      // Login will be at: /api/auth/login
-app.use('/api/students', studentRoutes); // Fetch will be at: /api/students?year=X
-
-// Start Server
+app.use('/api/auth', authRoutes);      
+app.use('/api/students', studentRoutes); 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

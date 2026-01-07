@@ -31,7 +31,6 @@ model Student {
   mobileNumber   String   // Student or Parent mobile
   address        String?
   modeOfTransport String? // "Bus", "Own", "Hostel"
-  bloodGroup     String?  // "O+", "B+"
-
+  bloodGroup     String?  
   createdAt      DateTime @default(now())
 }
